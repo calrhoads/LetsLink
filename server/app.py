@@ -22,6 +22,7 @@ def signup():
     if request.method == 'POST':
         try:
             data = request.get_json()
+            print(data)
             new_user = User(
                 username = data["username"],
                 _password = data["password"]
@@ -78,6 +79,33 @@ def swipe():
     random_user = User.query.filter(User.user_id != current_user_id).order_by(func.random()).first()
     
     return render_template('swipe.html', user=random_user)
+
+
+@app.route('/random_user', methods=['GET'])
+def get_random_user():
+    if 'user_id' not in session:
+        return {"Error": "Unauthorized"}, 401
+
+    current_user_id = session.get('user_id')
+
+    random_user = User.query.filter(User.user_id != current_user_id).order_by(func.random()).first()
+
+    if random_user:
+        return jsonify(random_user.to_dict()), 200
+    else:
+        return {"Error": "No random user found"}, 404
+
+@app.route('/matches', methods=['GET'])
+def get_matches():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    current_user_id = session['user_id']
+    current_user = User.query.get(current_user_id)
+    matches = current_user.matches_as_matcher + current_user.matches_as_matchee
+
+    match_dicts = [match.to_dict() for match in matches]
+
+    return jsonify(match_dicts), 200
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

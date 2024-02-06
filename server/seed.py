@@ -5,7 +5,7 @@ from random import randint
 
 # Remote library imports
 from faker import Faker
-
+from werkzeug.security import generate_password_hash
 # Local imports
 from app import app
 from models import db, User, Match, Message, Post
@@ -17,6 +17,7 @@ def generate_fake_data():
     for _ in range(10): 
         user = User(
             username=fake.user_name(),
+            _password=generate_password_hash(fake.password()),  
             gender=fake.random_element(elements=('Male', 'Female')),
             age=randint(18, 60),
             location=fake.city(),

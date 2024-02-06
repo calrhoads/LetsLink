@@ -31,10 +31,10 @@ class User(db.Model, SerializerMixin):
     @password_hash.setter
     def password_hash(self, password):
         hashed_password = bcrypt.generate_password_hash(password.encode('utf-8'))
-        self._password_hash = hashed_password.decode('utf-8')
+        self._password = hashed_password.decode('utf-8')
 
     def authenticate(self,password):
-        return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
+        return bcrypt.check_password_hash(self._password, password.encode('utf-8'))
     
     @validates('user')
     def validate_trainer(self,key,value):
@@ -48,7 +48,7 @@ class Match(db.Model):
     
     match_id = Column(Integer, primary_key=True)
     matcher_id = Column(Integer, ForeignKey('users.user_id')) 
-    matchee_id = Column(Integer, ForeignKey('users.user_id'))  
+    matchee_id = Column(Integer, ForeignKey('users.user_id')) 
 
     matcher = relationship('User', foreign_keys='Match.matcher_id', back_populates='matches_as_matcher')
     matchee = relationship('User', foreign_keys='Match.matchee_id', back_populates='matches_as_matchee')
