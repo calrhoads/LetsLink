@@ -1,11 +1,15 @@
-from flask import request, session, make_response, jsonify
-from config import app, db, api
+from flask import request, session, make_response, jsonify, redirect, url_for, render_template
+from sqlalchemy import func
+from config import app, db, CORS
 from models import db, User, Match, Message, Post
 
 
 @app.route('/')
 def home():
-    return ''
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    else:
+        return redirect(url_for('swipe'))
 
 @app.before_request
 def route_filter():
@@ -65,6 +69,15 @@ def users():
         dict_users = [user.to_dict() for user in all_users]
         return jsonify(dict_users), 200
 
+@app.route('/swipe')
+def swipe():
+    if 'user_id' not in session:
+        return redirect(url_for('login')) 
+    
+    current_user_id = session.get('user_id')
+    random_user = User.query.filter(User.user_id != current_user_id).order_by(func.random()).first()
+    
+    return render_template('swipe.html', user=random_user)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
