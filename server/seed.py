@@ -17,7 +17,7 @@ def generate_fake_data():
     for _ in range(10): 
         user = User(
             username=fake.user_name(),
-            _password=generate_password_hash(fake.password()),  
+            # password_hash=123,  
             gender=fake.random_element(elements=('Male', 'Female')),
             age=randint(18, 60),
             location=fake.city(),
@@ -25,6 +25,7 @@ def generate_fake_data():
             bio=fake.text(),
             preferences=fake.text()
         )
+        user.password_hash = '123'
         users.append(user)
 
     matches = []

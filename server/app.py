@@ -25,7 +25,7 @@ def signup():
             print(data)
             new_user = User(
                 username = data["username"],
-                _password = data["password"]
+                _password_hash = data["password"]
 
             )
             new_user.password_hash = data["password"]
@@ -102,6 +102,7 @@ def get_matches():
     current_user_id = session['user_id']
     current_user = User.query.get(current_user_id)
     matches = current_user.matches_as_matcher + current_user.matches_as_matchee
+    print(current_user.matches_as_matchee)
 
     match_dicts = [match.to_dict() for match in matches]
 

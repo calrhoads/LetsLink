@@ -11,7 +11,7 @@ class User(db.Model, SerializerMixin):
     
     user_id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
-    _password = Column(String, nullable=False)
+    _password_hash = Column(String(100), nullable=False)
     gender = Column(String)
     age = Column(Integer)
     location = Column(String)
@@ -22,7 +22,7 @@ class User(db.Model, SerializerMixin):
     matches_as_matchee = relationship('Match', foreign_keys='Match.matchee_id', back_populates='matchee')
     posts = relationship('Post', back_populates='user')
 
-    serialize_rules = ('-matches_as_matcher.matcher','-matches_as_matchee.matchee','-posts.user')
+    serialize_rules = ('-matches_as_matcher.matcher','-matches_as_matchee.matchee','-posts.user', 'matches_as_matcher', 'matches_as_matchee')
 
     @hybrid_property
     def password_hash(self):
@@ -31,13 +31,13 @@ class User(db.Model, SerializerMixin):
     @password_hash.setter
     def password_hash(self, password):
         hashed_password = bcrypt.generate_password_hash(password.encode('utf-8'))
-        self._password = hashed_password.decode('utf-8')
+        self._password_hash = hashed_password.decode('utf-8')
 
     def authenticate(self,password):
-        return bcrypt.check_password_hash(self._password, password.encode('utf-8'))
+        return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
     
     @validates('user')
-    def validate_trainer(self,key,value):
+    def validate_user(self,key,value):
         if value:
             return value
         else:
@@ -48,12 +48,23 @@ class Match(db.Model):
     
     match_id = Column(Integer, primary_key=True)
     matcher_id = Column(Integer, ForeignKey('users.user_id')) 
-    matchee_id = Column(Integer, ForeignKey('users.user_id')) 
+    matchee_id = Column(Integer, ForeignKey('users.user_id'))
+
 
     matcher = relationship('User', foreign_keys='Match.matcher_id', back_populates='matches_as_matcher')
     matchee = relationship('User', foreign_keys='Match.matchee_id', back_populates='matches_as_matchee')
 
-    serialize_rules = ('-matcher.matches_as_matcher','-matchee.matches_as_matchee')
+    serialize_rules = ('-matcher.matches_as_matcher','-matchee.matches_as_matchee', 'matcher', 'matchee')
+
+    def to_dict(self):
+        return {
+            'match_id': self.match_id,
+            'matcher_id': self.matcher_id,
+            'matchee_id': self.matchee_id,
+            'matchee_username': self.matchee.username,
+            'matchee_profile_pic': self.matchee.profile_pic
+            
+        }
 
 class Message(db.Model):
     __tablename__ = 'messages'
