@@ -24,9 +24,7 @@ def signup():
             data = request.get_json()
             print(data)
             new_user = User(
-                username = data["username"],
-                _password_hash = data["password"]
-
+                username = data["username"]
             )
             new_user.password_hash = data["password"]
             db.session.add(new_user)
@@ -107,6 +105,35 @@ def get_matches():
     match_dicts = [match.to_dict() for match in matches]
 
     return jsonify(match_dicts), 200
+
+@app.route('/my_profile', methods=['PATCH', 'DELETE'])
+def profile_page():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    current_user_id = session['user_id']
+    current_user = User.query.get(current_user_id)
+
+    if request.method == "PATCH":
+        try:
+            data = request.get_json()
+            for attr in data:
+                setattr(current_user,attr,data[attr])
+            db.session.add(current_user)
+            db.session.commit()
+            return make_response(current_user.to_dict(),202)
+        except:
+            return make_response({"errors": ["validation errors"]},400)
+    elif request.method == "DELETE":
+            db.session.delete(current_user)
+            db.session.commit()
+            return make_response({},204)
+    else:
+        return make_response({"error": "Profile not found"},404)
+        
+
+    
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
