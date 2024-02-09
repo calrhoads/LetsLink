@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from flask_bcrypt import Bcrypt
 
+
 # Local imports
 
 # Instantiate app, set attributes
