@@ -40,3 +40,54 @@
 .read-the-docs {
   color: #888;
 }
+
+.Navbar {
+  width: 500px;
+}
+
+.matchesButton {
+  margin-left: 30px;
+}
+
+.Navbar__right {
+  height: 50px;
+  width: 200px;
+}
+
+header {
+  position: fixed; /* or 'absolute' depending on your layout */
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    z-index: 999
+}
+
+.userDiv {
+  margin-top: 50px;
+}
+
+.matches-container {
+  padding: 20px;
+}
+
+.matches-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.match-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.profile-pic {
+  width: 100%;
+  height: auto;
+  max-width: 150px; /* Adjust as needed */
+}
+
+.myProfile {
+  margin-top: 50px;
+}
