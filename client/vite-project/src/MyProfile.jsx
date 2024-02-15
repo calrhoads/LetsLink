@@ -21,7 +21,11 @@ function MyProfile({ user, setUser }) {
     const [imageSelected, setImageSelected] = useState("")
 
     const handleUpdateProfile = async (updatedData) => {
+
         try {
+            if (imageSelected) {
+                updatedData.profile_pic = imageSelected.url;
+            }
             const response = await fetch('/api/my_profile', {
                 method: 'PATCH',
                 headers: {
@@ -30,11 +34,11 @@ function MyProfile({ user, setUser }) {
                 body: JSON.stringify(updatedData),
                 credentials: 'include'
             });
-
+    
             if (!response.ok) {
                 throw new Error('Failed to update profile');
             }
-
+    
             setUser({
                 ...user,
                 ...updatedData
@@ -61,13 +65,13 @@ function MyProfile({ user, setUser }) {
     }
 
     const uploadImage = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         try {
             const pictureFormData = new FormData();
             pictureFormData.append("file", imageSelected);
-            pictureFormData.append("upload_preset", "q7lw26mx")
+            pictureFormData.append("upload_preset", "q7lw26mx");
     
-            const response = await fetch(
+            const responseCloudinary = await fetch(
                 "https://api.cloudinary.com/v1_1/dg4sixjnk/image/upload",
                 {
                     method: "POST",
@@ -75,16 +79,36 @@ function MyProfile({ user, setUser }) {
                 }
             );
     
-            if (!response.ok) {
-                throw new Error("Failed to upload image")
+            if (!responseCloudinary.ok) {
+                throw new Error("Failed to upload image to Cloudinary");
             }
     
-            const data = await response.json();
-            console.log(data)
+            const cloudinaryData = await responseCloudinary.json();
+            console.log(cloudinaryData);
+    
+            const responseBackend = await fetch("/api/upload-profile-picture", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                },
+                body: JSON.stringify({
+                    fileUrl: cloudinaryData.secure_url,
+                    
+                })
+            });
+    
+            if (!responseBackend.ok) {
+                throw new Error("Failed to upload image to backend");
+            }
+    
+            
         } catch (error) {
-            console.error("Error uploading image:", error)
+            console.error("Error uploading image:", error);
         }
-    }
+    };
+    
+
     console.log(imageSelected)
     return (
         <div>
@@ -92,7 +116,7 @@ function MyProfile({ user, setUser }) {
             <h2>{user.username}</h2>
             <form>
                 <label>Profile Picture</label>
-                <Image cloudName='dg4sixjnk' publicId="https://res.cloudinary.com/dg4sixjnk/image/upload/v1708025293/a2ukhlwms7r5u5pop8gx.jpg"/>
+                <img src = {user.profile_pic}/>
                 <input type="file" name="profile_pic" onChange={(e)=> {
                     setImageSelected(e.target.files[0])
                 }} />
