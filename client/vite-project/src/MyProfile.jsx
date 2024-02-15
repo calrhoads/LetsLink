@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Image } from 'cloudinary-react';
 
 
 function MyProfile({ user, setUser }) {
@@ -16,6 +17,8 @@ function MyProfile({ user, setUser }) {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+
+    const [imageSelected, setImageSelected] = useState("")
 
     const handleUpdateProfile = async (updatedData) => {
         try {
@@ -57,16 +60,44 @@ function MyProfile({ user, setUser }) {
         return <div>Loading...</div>;
     }
 
+    const uploadImage = async (e) => {
+        e.preventDefault()
+        try {
+            const pictureFormData = new FormData();
+            pictureFormData.append("file", imageSelected);
+            pictureFormData.append("upload_preset", "q7lw26mx")
+    
+            const response = await fetch(
+                "https://api.cloudinary.com/v1_1/dg4sixjnk/image/upload",
+                {
+                    method: "POST",
+                    body: pictureFormData
+                }
+            );
+    
+            if (!response.ok) {
+                throw new Error("Failed to upload image")
+            }
+    
+            const data = await response.json();
+            console.log(data)
+        } catch (error) {
+            console.error("Error uploading image:", error)
+        }
+    }
+    console.log(imageSelected)
     return (
         <div>
             <h2 className='myProfile'>My Profile</h2>
             <h2>{user.username}</h2>
             <form>
                 <label>Profile Picture</label>
-                <p>{user.profile_pic}</p>
-                <input type="image" name="profile_pic" value={formData.profile_pic} onChange={handleChange} />
-                <button onClick={() => handleUpdateProfile({ profile_pic: formData.profile_pic })}>Edit</button>
-                <br />ß
+                <Image cloudName='dg4sixjnk' publicId="https://res.cloudinary.com/dg4sixjnk/image/upload/v1708025293/a2ukhlwms7r5u5pop8gx.jpg"/>
+                <input type="file" name="profile_pic" onChange={(e)=> {
+                    setImageSelected(e.target.files[0])
+                }} />
+                <button onClick={uploadImage}>Upload Image</button>
+                <br />
 
                 <label>Gender</label>
                 <p>{user.gender}</p>
